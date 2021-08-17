@@ -60,7 +60,7 @@ static inline void increase_circular_value(uint16_t *value, uint16_t amount, uin
 static inline uint8_t sheller_found_start_byte(sheller_t *desc)
 {
     while((desc->rx_buff[desc->rx_buff_begin] != SHELLER_START_BYTE) && (desc->rx_buff_begin != desc->rx_buff_end)) {
-        desc->rx_buff_begin = (desc->rx_buff_begin + 1) % SHELLER_RX_BUFF_LENGTH;
+        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
     }
 
     if (desc->rx_buff[desc->rx_buff_begin] == SHELLER_START_BYTE) {
@@ -188,12 +188,11 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
                 } else {
                     increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
                 }
-
-                if (desc->rx_buff_begin == desc->rx_buff_end) {
-                    desc->rx_buff_empty_flag = 1;
-                }
             }
 
+            if (desc->rx_buff_begin == desc->rx_buff_end) {
+                desc->rx_buff_empty_flag = 1;
+            }
         }
     }
 
