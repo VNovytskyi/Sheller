@@ -1,4 +1,5 @@
 #include "sheller.h"
+#include <QDebug>
 
 static const uint8_t crc8_table[256] = {
     0x00, 0x31, 0x62, 0x53, 0xC4, 0xF5, 0xA6, 0x97,
@@ -77,7 +78,8 @@ static inline uint8_t sheller_try_read_data(sheller_t *desc)
     uint16_t received_crc = desc->rx_buff[received_crc_position];
 
     uint8_t calculate_crc = 0xFF;
-    uint16_t begin = desc->rx_buff_begin + 1;
+    uint16_t begin = desc->rx_buff_begin;
+    increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
     for (uint8_t i = 0; i < 8; ++i) {
         get_crc8_by_byte(&calculate_crc, desc->rx_buff[begin]);
         increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
