@@ -28,6 +28,4 @@ uint8_t sheller_push(sheller_t *desc, uint8_t byte);
 uint8_t sheller_read(sheller_t *desc, uint8_t *dest);
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, uint8_t data_length, uint8_t *dest);
 
-inline void get_crc8_by_byte(uint8_t *crc_value, uint8_t byte);
-
 #endif // SHELLER_H
