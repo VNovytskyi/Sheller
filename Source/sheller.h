@@ -24,8 +24,8 @@ typedef struct {
 } sheller_t;
 
 uint8_t sheller_init(sheller_t *desc);
-uint8_t sheller_push(sheller_t *desc, uint8_t byte);
+uint8_t sheller_push(sheller_t *desc, const uint8_t byte);
 uint8_t sheller_read(sheller_t *desc, uint8_t *dest);
-uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, uint8_t data_length, uint8_t *dest);
+uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, uint8_t *dest);
 
 #endif // SHELLER_H
