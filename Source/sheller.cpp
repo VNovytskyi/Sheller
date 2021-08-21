@@ -57,10 +57,15 @@ static inline void increase_circular_value(uint16_t *value, uint16_t amount, uin
     }
 }
 
+//TODO: Функция не должна выполнять лишних действий ! Не изменять desc->rx_buff_begin, а возвращать
 static inline uint8_t sheller_found_start_byte(sheller_t *desc)
 {
-    while((desc->rx_buff[desc->rx_buff_begin] != SHELLER_START_BYTE) && (desc->rx_buff_begin != desc->rx_buff_end)) {
-        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+    if ((desc->rx_buff_begin == desc->rx_buff_end) && desc->rx_buff_empty_flag == 0) {
+        //Пройтись с ограничением в размер буффера
+    } else {
+        while((desc->rx_buff[desc->rx_buff_begin] != SHELLER_START_BYTE) && (desc->rx_buff_begin != desc->rx_buff_end)) {
+            increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+        }
     }
 
     if (desc->rx_buff[desc->rx_buff_begin] == SHELLER_START_BYTE) {
@@ -152,6 +157,10 @@ uint8_t sheller_init(sheller_t *desc)
 */
 uint8_t sheller_push(sheller_t *desc, uint8_t byte)
 {
+    /*qDebug() << "\nBefore\nSheller buff: " << QByteArray((char*)desc->rx_buff, SHELLER_RX_BUFF_LENGTH).toHex('.');
+    qDebug() << "Length = " << QString::number(sheller_rx_buff_used_length(desc));
+    qDebug() << "Begin = " << QString::number(desc->rx_buff_begin);
+    qDebug() << "End = " << QString::number(desc->rx_buff_end);*/
     uint8_t work_result = SHELLER_ERROR;
     if (desc != NULL) {
         if (desc->rx_buff_end != desc->rx_buff_begin || desc->rx_buff_empty_flag == 1) {
@@ -161,8 +170,17 @@ uint8_t sheller_push(sheller_t *desc, uint8_t byte)
             work_result = SHELLER_OK;
         } else {
             //Overflow signal
+            qDebug() << "Length = " << QString::number(sheller_rx_buff_used_length(desc));
+            qDebug() << "Begin = " << QString::number(desc->rx_buff_begin);
+            qDebug() << "End = " << QString::number(desc->rx_buff_end);
         }
     }
+
+    /*qDebug() << "\nAfter\nSheller buff: " << QByteArray((char*)desc->rx_buff, SHELLER_RX_BUFF_LENGTH).toHex('.');
+    qDebug() << "Length = " << QString::number(sheller_rx_buff_used_length(desc));
+    qDebug() << "Begin = " << QString::number(desc->rx_buff_begin);
+    qDebug() << "End = " << QString::number(desc->rx_buff_end);*/
+
     return work_result;
 }
 
@@ -180,13 +198,24 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL) {
         if (sheller_rx_buff_used_length(desc) >= (SHELLER_MESSAGE_LENGTH + SHELLER_SERVICE_BYTES_COUNT)) {
-            if (sheller_found_start_byte(desc)) {   
+            qDebug() << "Sheller buff: " << QByteArray((char*)desc->rx_buff, SHELLER_RX_BUFF_LENGTH).toHex('.');
+            qDebug() << "End = " << QString::number(desc->rx_buff_end);
+            qDebug() << "   y Begin = " << QString::number(desc->rx_buff_begin);
+            if (sheller_found_start_byte(desc)) {
+                qDebug() << "   x Begin = " << QString::number(desc->rx_buff_begin);
                 if (sheller_try_read_data(desc)) {
+                    qDebug() << "   0 Begin = " << QString::number(desc->rx_buff_begin);
                     sheller_write_received_package(desc, dest);
+                    qDebug() << "   1 Begin = " << QString::number(desc->rx_buff_begin);
                     increase_circular_value(&desc->rx_buff_begin, 2, SHELLER_RX_BUFF_LENGTH);
+                    qDebug() << "   2 Begin = " << QString::number(desc->rx_buff_begin);
                     result = SHELLER_OK;
                 } else {
-                    increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+                    if (desc->rx_buff_begin != desc->rx_buff_end) {
+                        qDebug() << "   3 Begin = " << QString::number(desc->rx_buff_begin);
+                        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+                        qDebug() << "   4 Begin = " << QString::number(desc->rx_buff_begin);
+                    }
                 }
             }
 
