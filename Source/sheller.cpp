@@ -45,10 +45,11 @@ static inline uint8_t get_crc8(uint8_t *data, uint8_t length)
     return crc;
 }
 
-static inline void get_crc8_by_byte(uint8_t *crc_value, uint8_t byte)
+inline void get_crc8_by_byte(uint8_t *crc_value, uint8_t byte)
 {
     *crc_value = crc8_table[*crc_value ^ byte];
 }
+
 
 static inline void increase_circular_value(uint16_t *value, uint16_t amount, uint16_t max_value)
 {
@@ -198,23 +199,23 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL) {
         if (sheller_rx_buff_used_length(desc) >= (SHELLER_MESSAGE_LENGTH + SHELLER_SERVICE_BYTES_COUNT)) {
-            qDebug() << "Sheller buff: " << QByteArray((char*)desc->rx_buff, SHELLER_RX_BUFF_LENGTH).toHex('.');
-            qDebug() << "End = " << QString::number(desc->rx_buff_end);
-            qDebug() << "   y Begin = " << QString::number(desc->rx_buff_begin);
+            //qDebug() << "Sheller buff: " << QByteArray((char*)desc->rx_buff, SHELLER_RX_BUFF_LENGTH).toHex('.');
+           // qDebug() << "End = " << QString::number(desc->rx_buff_end);
+           // qDebug() << "   y Begin = " << QString::number(desc->rx_buff_begin);
             if (sheller_found_start_byte(desc)) {
-                qDebug() << "   x Begin = " << QString::number(desc->rx_buff_begin);
+               // qDebug() << "   x Begin = " << QString::number(desc->rx_buff_begin);
                 if (sheller_try_read_data(desc)) {
-                    qDebug() << "   0 Begin = " << QString::number(desc->rx_buff_begin);
+                   // qDebug() << "   0 Begin = " << QString::number(desc->rx_buff_begin);
                     sheller_write_received_package(desc, dest);
-                    qDebug() << "   1 Begin = " << QString::number(desc->rx_buff_begin);
+                    //qDebug() << "   1 Begin = " << QString::number(desc->rx_buff_begin);
                     increase_circular_value(&desc->rx_buff_begin, 2, SHELLER_RX_BUFF_LENGTH);
-                    qDebug() << "   2 Begin = " << QString::number(desc->rx_buff_begin);
+                    //qDebug() << "   2 Begin = " << QString::number(desc->rx_buff_begin);
                     result = SHELLER_OK;
                 } else {
                     if (desc->rx_buff_begin != desc->rx_buff_end) {
-                        qDebug() << "   3 Begin = " << QString::number(desc->rx_buff_begin);
+                        //qDebug() << "   3 Begin = " << QString::number(desc->rx_buff_begin);
                         increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
-                        qDebug() << "   4 Begin = " << QString::number(desc->rx_buff_begin);
+                        //qDebug() << "   4 Begin = " << QString::number(desc->rx_buff_begin);
                     }
                 }
             }
@@ -239,14 +240,17 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, uint8_t data_length, uint8_t *dest)
 {
     uint8_t result = SHELLER_ERROR;
-    if ((desc != NULL) && (dest != NULL)) {
-        dest[0] = SHELLER_START_BYTE;
+    if ((desc != NULL) && (dest != NULL) && (data != NULL)) {
         if ((data_length <= SHELLER_MESSAGE_LENGTH) && (data_length > 0)) {
+            memset(dest, 0, SHELLER_MESSAGE_BUFFER_LENGTH);
+            dest[0] = SHELLER_START_BYTE;
             memcpy((dest + 1), data, data_length);
-            dest[SHELLER_MESSAGE_LENGTH + 1] = get_crc8(data, data_length);
+            dest[SHELLER_MESSAGE_LENGTH + 1] = get_crc8((dest + 1), SHELLER_MESSAGE_LENGTH);
             result = SHELLER_OK;
         }
     }
+
+    return result;
 
     return result;
 }

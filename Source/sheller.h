@@ -13,6 +13,7 @@
 #define SHELLER_MESSAGE_LENGTH 8
 #define SHELLER_RX_BUFF_LENGTH 32
 #define SHELLER_SERVICE_BYTES_COUNT 2
+#define SHELLER_MESSAGE_BUFFER_LENGTH SHELLER_MESSAGE_LENGTH + SHELLER_SERVICE_BYTES_COUNT
 
 typedef struct {
     uint8_t  rx_buff_empty_flag;
@@ -26,5 +27,7 @@ uint8_t sheller_init(sheller_t *desc);
 uint8_t sheller_push(sheller_t *desc, uint8_t byte);
 uint8_t sheller_read(sheller_t *desc, uint8_t *dest);
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, uint8_t data_length, uint8_t *dest);
+
+inline void get_crc8_by_byte(uint8_t *crc_value, uint8_t byte);
 
 #endif // SHELLER_H
