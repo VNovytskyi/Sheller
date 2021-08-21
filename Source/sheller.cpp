@@ -251,6 +251,4 @@ uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, uint8_t data_length, uint8_
     }
 
     return result;
-
-    return result;
 }
