@@ -1,4 +1,6 @@
-![Logo](logo.PNG)
+<p align="center">
+  <img src="logo.png">
+</p>
 
 Library design for organization package data exchange with  integrity guarantee.
 
