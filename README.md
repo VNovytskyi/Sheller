@@ -1,4 +1,4 @@
-# Sheller delivery guarantee
+# Sheller integrity guarantee
 <p align="center">
   <img src="logo.png">
 </p>
