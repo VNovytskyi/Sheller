@@ -85,7 +85,7 @@ static inline uint8_t sheller_found_start_byte(sheller_t *desc)
 static inline uint8_t sheller_try_read_data(sheller_t *desc)
 {
     uint16_t received_crc_position = desc->rx_buff_begin;
-    increase_circular_value(&received_crc_position, SHELLER_MESSAGE_LENGTH + 1, SHELLER_RX_BUFF_LENGTH);
+    increase_circular_value(&received_crc_position, SHELLER_USEFULL_DATA_LENGTH + 1, SHELLER_RX_BUFF_LENGTH);
     uint8_t received_crc_l = desc->rx_buff[received_crc_position];
     increase_circular_value(&received_crc_position, 1, SHELLER_RX_BUFF_LENGTH);
     uint8_t received_crc_h = desc->rx_buff[received_crc_position];
@@ -191,7 +191,7 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 {
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL && dest != NULL) {
-        if (sheller_get_circular_buff_length(desc) >= SHELLER_MESSAGE_BUFFER_LENGTH) {
+        if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
             if (sheller_found_start_byte(desc)) {
                 if (sheller_try_read_data(desc)) {
                     sheller_write_received_package(desc, dest);
@@ -226,14 +226,14 @@ uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, 
 {
     uint8_t result = SHELLER_ERROR;
     if ((desc != NULL) && (dest != NULL) && (data != NULL)) {
-        if ((data_length <= SHELLER_MESSAGE_LENGTH) && (data_length > 0)) {
-            memset(dest, 0, SHELLER_MESSAGE_BUFFER_LENGTH);
+        if ((data_length <= SHELLER_USEFULL_DATA_LENGTH) && (data_length > 0)) {
+            memset(dest, 0, SHELLER_PACKAGE_LENGTH);
             dest[0] = SHELLER_START_BYTE;
             memcpy((dest + 1), data, data_length);
 
-            uint16_t crc = get_crc((dest + 1), SHELLER_MESSAGE_LENGTH);
-            dest[SHELLER_MESSAGE_LENGTH + 1] = crc & 0xFF;
-            dest[SHELLER_MESSAGE_LENGTH + 2] = (crc >> 8) & 0xFF;
+            uint16_t crc = get_crc((dest + 1), SHELLER_USEFULL_DATA_LENGTH);
+            dest[SHELLER_USEFULL_DATA_LENGTH + 1] = crc & 0xFF;
+            dest[SHELLER_USEFULL_DATA_LENGTH + 2] = (crc >> 8) & 0xFF;
 
             result = SHELLER_OK;
         }
