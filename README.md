@@ -1,16 +1,21 @@
+# Sheller delivery guarantee
 <p align="center">
   <img src="logo.png">
 </p>
 
+## Overview
 Library design for organization package data exchange with  integrity guarantee.
-
 The package consists of Start-byte, a label for begin parsing 
-package and several bytes of Cyclic redundancy check CRC-16 (CRC-byte) for integrity determination. Struct of package:
+package and several bytes of Cyclic redundancy check CRC-16 (CRC-byte) for integrity determination. <br>
+
+Struct of package:
 ![Struct of the package](Schemes/Schema3.PNG)
 The library use CRC-16, therefore, the amount of CRC bytes is 2, and the maximum length of user data is 4095 bytes. 
 Preset value of user data is 8 bytes. Eventually, 8 bytes useful bytes plus 3 service bytes. To speed up processing the CRC is using the table method.
 The size of the CRC table is 512 bytes. Interaction with this library going through 3 functions: wrap, push, read:
 ![Struct of the package](Schemes/Schema1.PNG)
+
+## How to use
 To create the package, the user needs to pass in function wrap a pointer of the sheller`s object, a pointer to data, which needs to send, the length of data, and a pointer to the buffer for storing the package.
 ```c
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, uint8_t *dest);
@@ -28,10 +33,13 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest);
 ```
 In this function pass a pointer of the Sheller`s object and a pointer to the buffer for the received package. Calling the function read starts the process of parsing the package from an internal circular buffer. The function returns true in case successful reading the package otherwise – false.<br>
 The size of circular internal buffer defined by SHELLER_RX_BUFF_LENGTH.<br>
-Buffer overflow can occur due to frequent call the push function and rare call the function read or too high frequency of receiving bytes and too small size of internal buffer SHELLER_RX_BUFF_LENGTH. <br>
-Work logic:
+Buffer overflow can occur due to frequent call the push function and rare call the function read or too high frequency of receiving bytes and too small size of internal buffer SHELLER_RX_BUFF_LENGTH.
+
+## Internal logic
 ![Struct of the package](Schemes/Schema2.PNG)
 Sheller assumes work in communication channels with a high influence of interference. Functioning under such conditions is achieved by a State-machine, which is used for byte-by-byte data reception and a checksum algorithm. <br>
+
+## Test cases
 The illustration below shows examples of the effect of interference on transmitted packets:
 ![Struct of the package](Schemes/Schema4.PNG)
 In the first case, the package reached the recipient without damage.<br>
