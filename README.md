@@ -1,4 +1,5 @@
-# Sheller
+![Logo](logo.PNG)
+
 Library design for organization package data exchange with  integrity guarantee.
 
 The package consists of Start-byte, a label for begin parsing 
