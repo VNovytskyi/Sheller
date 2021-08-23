@@ -1,3 +1,8 @@
+/*
+    @file       sheller.h
+    @author     vladyslavN
+    @version    0.2  
+*/
 #ifndef SHELLER_H
 #define SHELLER_H
 
