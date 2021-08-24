@@ -9,11 +9,11 @@ The package consists of Start-byte, a label for begin parsing
 package and several bytes of Cyclic redundancy check CRC-16 (CRC-byte) for integrity determination. <br>
 
 Struct of package:
-![Struct of the package](Schemes/Schema3.PNG)
+![Struct of the package](Schemes/Scheme3.PNG)
 The library use CRC-16, therefore, the amount of CRC bytes is 2, and the maximum length of user data is 4095 bytes. 
 Preset value of user data is 8 bytes. Eventually, 8 bytes useful bytes plus 3 service bytes. To speed up processing the CRC is using the table method.
 The size of the CRC table is 512 bytes. Interaction with this library going through 3 functions: wrap, push, read:
-![Struct of the package](Schemes/Schema1.PNG)
+![Struct of the package](Schemes/Scheme1.PNG)
 
 ## How to use
 To create the package, the user needs to pass in function wrap a pointer of the sheller`s object, a pointer to data, which needs to send, the length of data, and a pointer to the buffer for storing the package.
@@ -36,13 +36,14 @@ The size of circular internal buffer defined by SHELLER_RX_BUFF_LENGTH.<br>
 Buffer overflow can occur due to frequent call the push function and rare call the function read or too high frequency of receiving bytes and too small size of internal buffer SHELLER_RX_BUFF_LENGTH.
 
 ## Internal logic
-![Struct of the package](Schemes/Schema2.PNG)
+![Struct of the package](Schemes/Scheme2.PNG)
 Sheller assumes work in communication channels with a high influence of interference. Functioning under such conditions is achieved by a State-machine, which is used for byte-by-byte data reception and a checksum algorithm. <br>
 
 ## Test cases
 The illustration below shows examples of the effect of interference on transmitted packets:
-![Struct of the package](Schemes/Schema4.PNG)
-In the first case, the package reached the recipient without damage.<br>
-The second case demonstrates that Sheller does not impose restrictions on the transmitted data. The user data may contain service bytes.<br>
-In the third case, the interference changed the value of the second byte. As a result, the checksum was not converged on the receiving side and the packet was not transferred to the business logic.<br>
-In the fourth case, part of the package was lost due to interference or lack of contact. The checksum did not agree on the receiving side. In this case, a search was performed for the next initial byte, followed by the similarity of the checksum and the transfer of the packet to the business logic of the application.<br> 
+![Struct of the package](Schemes/Scheme4.PNG)
+In the <b>1</b> case, the package reached the recipient without damage.<br>
+The <b>2</b> case demonstrates that Sheller does not impose restrictions on the transmitted data. The user data may contain service bytes.<br>
+In the <b>3</b> case, the interference changed the value of the second byte. As a result, the checksum was not converged on the receiving side and the packet was not transferred to the business logic.<br>
+In the <b>4</b> case, part of the package was lost due to interference or lack of contact. The checksum did not agree on the receiving side. In this case, a search was performed for the next initial byte, followed by the similarity of the checksum and the transfer of the packet to the business logic of the application.<br> 
+In the <b>5</b>  test shows that the read function can be called over a circular buffer if there is a partially received packet
