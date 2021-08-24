@@ -197,18 +197,20 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
     if (desc != NULL && dest != NULL) {
         if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
             if (sheller_found_start_byte(desc)) {
-                if (sheller_try_read_data(desc)) {
-                    sheller_write_received_package(desc, dest);
-                    increase_circular_value(&desc->rx_buff_begin, 3, SHELLER_RX_BUFF_LENGTH);
-                    result = SHELLER_OK;
-                } else {
-                    if (desc->rx_buff_begin != desc->rx_buff_end) {
-                        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+                if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
+                    if (sheller_try_read_data(desc)) {
+                        sheller_write_received_package(desc, dest);
+                        increase_circular_value(&desc->rx_buff_begin, 3, SHELLER_RX_BUFF_LENGTH);
+                        result = SHELLER_OK;
+                    } else {
+                        if (desc->rx_buff_begin != desc->rx_buff_end) {
+                            increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+                        }
                     }
-                }
 
-                if (desc->rx_buff_begin == desc->rx_buff_end) {
-                    desc->rx_buff_empty_flag = 1;
+                    if (desc->rx_buff_begin == desc->rx_buff_end) {
+                        desc->rx_buff_empty_flag = 1;
+                    }
                 }
             }
         }
