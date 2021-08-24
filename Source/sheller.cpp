@@ -195,7 +195,6 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 {
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL && dest != NULL) {
-        uint16_t len = sheller_get_circular_buff_length(desc);
         if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
             if (sheller_found_start_byte(desc)) {
                 if (sheller_try_read_data(desc)) {
