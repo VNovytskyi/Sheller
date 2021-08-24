@@ -1,7 +1,7 @@
 /*
     @file       sheller.h
     @author     vladyslavN
-    @version    0.4  
+    @version    0.3
 */
 #ifndef SHELLER_H
 #define SHELLER_H
