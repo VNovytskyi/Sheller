@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#define FAST_CRC
+#define TABLE_CRC
 
-#ifdef FAST_CRC
+#ifdef TABLE_CRC
 extern const uint16_t crc16_table[256];
 #endif
 

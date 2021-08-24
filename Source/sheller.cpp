@@ -76,10 +76,8 @@ static inline uint16_t sheller_get_circular_buff_length(sheller_t *desc)
             value = desc->rx_buff_end - desc->rx_buff_begin;
         } else if (desc->rx_buff_end < desc->rx_buff_begin) {
             value = (SHELLER_RX_BUFF_LENGTH - desc->rx_buff_begin) + desc->rx_buff_end;
-        } else {
-            if (desc->rx_buff_empty_flag == 0) {
-                value = SHELLER_RX_BUFF_LENGTH;
-            }
+        } else if (desc->rx_buff_empty_flag == 0) {
+            value = SHELLER_RX_BUFF_LENGTH;
         }
     }
 
@@ -153,9 +151,7 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
                         increase_circular_value(&desc->rx_buff_begin, 3, SHELLER_RX_BUFF_LENGTH);
                         result = SHELLER_OK;
                     } else {
-                        if (desc->rx_buff_begin != desc->rx_buff_end) {
-                            increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
-                        }
+                        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
                     }
 
                     if (desc->rx_buff_begin == desc->rx_buff_end) {
