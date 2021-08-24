@@ -39,7 +39,7 @@ static inline uint16_t get_crc(const uint8_t *data, const uint16_t length)
 {
     uint16_t crc = 0xFFFF;
     for(uint8_t i = 0; i < length; ++i){
-         crc = (crc << 8) ^ crc16_table[(crc >> 8) ^ *data++];
+        crc = (crc << 8) ^ crc16_table[(crc >> 8) ^ *data++];
     }
 
     return crc;
@@ -111,6 +111,10 @@ static inline void sheller_write_received_package(sheller_t *desc, uint8_t *dest
     for (uint8_t i = 0; i < 8; ++i) {
         increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
         dest[i] = desc->rx_buff[desc->rx_buff_begin];
+    }
+
+    if (desc->rx_buff_begin == desc->rx_buff_end) {
+        desc->rx_buff_empty_flag = 1;
     }
 }
 
@@ -191,21 +195,22 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 {
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL && dest != NULL) {
+        uint16_t len = sheller_get_circular_buff_length(desc);
         if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
             if (sheller_found_start_byte(desc)) {
                 if (sheller_try_read_data(desc)) {
                     sheller_write_received_package(desc, dest);
-                    increase_circular_value(&desc->rx_buff_begin, 2, SHELLER_RX_BUFF_LENGTH);
+                    increase_circular_value(&desc->rx_buff_begin, 3, SHELLER_RX_BUFF_LENGTH);
                     result = SHELLER_OK;
                 } else {
                     if (desc->rx_buff_begin != desc->rx_buff_end) {
                         increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
                     }
                 }
-            }
 
-            if (desc->rx_buff_begin == desc->rx_buff_end) {
-                desc->rx_buff_empty_flag = 1;
+                if (desc->rx_buff_begin == desc->rx_buff_end) {
+                    desc->rx_buff_empty_flag = 1;
+                }
             }
         }
     }
