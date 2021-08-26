@@ -44,7 +44,7 @@ static inline uint8_t sheller_try_read_data(sheller_t *desc)
     uint16_t calculate_crc = 0xFFFF;
     uint16_t begin = desc->rx_buff_begin;
     increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
-    for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t i = 0; i < SHELLER_USEFULL_DATA_LENGTH; ++i) {
         get_crc_by_byte(&calculate_crc, desc->rx_buff[begin]);
         increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
     }
@@ -58,7 +58,7 @@ static inline uint8_t sheller_try_read_data(sheller_t *desc)
 
 static inline void sheller_write_received_package(sheller_t *desc, uint8_t *dest)
 {
-    for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t i = 0; i < SHELLER_USEFULL_DATA_LENGTH; ++i) {
         increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
         dest[i] = desc->rx_buff[desc->rx_buff_begin];
     }
