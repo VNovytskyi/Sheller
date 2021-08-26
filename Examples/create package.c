@@ -7,14 +7,12 @@ sheller_init(&shell, 0x23, USEFULL_DATA_LENGTH, 128);
 
 /* 
     2) Declaration  the buffer with the data you want to send.
-    * The length of the data must be equal or less than SHELLER_USEFULL_DATA_LENGTH = 8 !
 */
 uint8_t data[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
 /*
     3) Declaration the buffer for storing wrappering data
     * Size of wrappers message not dependent on user data length. 
-    * The length of wrapped data is static and defined by SHELLER_PACKAGE_LENGTH = 11
 */
 uint8_t wrappered_data[USEFULL_DATA_LENGTH + SHELLER_SERVICE_BYTES_COUNT] = {0};
 
