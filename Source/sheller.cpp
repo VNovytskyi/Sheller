@@ -11,19 +11,19 @@ static inline void increase_circular_value(uint16_t *value, const uint16_t amoun
 static inline uint8_t sheller_found_start_byte(sheller_t *desc)
 {
     if ((desc->rx_buff_begin == desc->rx_buff_end) && desc->rx_buff_empty_flag == 0) {
-        for (uint16_t i = 0; i < SHELLER_RX_BUFF_LENGTH; ++i) {
-            if(desc->rx_buff[desc->rx_buff_begin] == SHELLER_START_BYTE) {
+        for (uint16_t i = 0; i < desc->rx_buff_length; ++i) {
+            if(desc->rx_buff[desc->rx_buff_begin] == desc->start_byte) {
                 desc->start_byte_pos = desc->rx_buff_begin;
                 return 1;
             }
-            increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+            increase_circular_value(&desc->rx_buff_begin, 1, desc->rx_buff_length);
         }
     } else {
-        while((desc->rx_buff[desc->rx_buff_begin] != SHELLER_START_BYTE) && (desc->rx_buff_begin != desc->rx_buff_end)) {
-            increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+        while((desc->rx_buff[desc->rx_buff_begin] != desc->start_byte) && (desc->rx_buff_begin != desc->rx_buff_end)) {
+            increase_circular_value(&desc->rx_buff_begin, 1, desc->rx_buff_length);
         }
 
-        if (desc->rx_buff[desc->rx_buff_begin] == SHELLER_START_BYTE) {
+        if (desc->rx_buff[desc->rx_buff_begin] == desc->start_byte) {
             desc->start_byte_pos = desc->rx_buff_begin;
             return 1;
         }
@@ -35,18 +35,18 @@ static inline uint8_t sheller_found_start_byte(sheller_t *desc)
 static inline uint8_t sheller_try_read_data(sheller_t *desc)
 {
     uint16_t received_crc_position = desc->rx_buff_begin;
-    increase_circular_value(&received_crc_position, SHELLER_USEFULL_DATA_LENGTH + 1, SHELLER_RX_BUFF_LENGTH);
+    increase_circular_value(&received_crc_position, desc->usefull_data_length + 1, desc->rx_buff_length);
     uint8_t received_crc_l = desc->rx_buff[received_crc_position];
-    increase_circular_value(&received_crc_position, 1, SHELLER_RX_BUFF_LENGTH);
+    increase_circular_value(&received_crc_position, 1, desc->rx_buff_length);
     uint8_t received_crc_h = desc->rx_buff[received_crc_position];
     uint16_t received_crc = received_crc_l | ((uint16_t)received_crc_h << 8);
 
     uint16_t calculate_crc = 0xFFFF;
     uint16_t begin = desc->rx_buff_begin;
-    increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
-    for (uint8_t i = 0; i < SHELLER_USEFULL_DATA_LENGTH; ++i) {
+    increase_circular_value(&begin, 1, desc->rx_buff_length);
+    for (uint8_t i = 0; i < desc->usefull_data_length; ++i) {
         get_crc_by_byte(&calculate_crc, desc->rx_buff[begin]);
-        increase_circular_value(&begin, 1, SHELLER_RX_BUFF_LENGTH);
+        increase_circular_value(&begin, 1, desc->rx_buff_length);
     }
 
     if (calculate_crc == received_crc) {
@@ -58,8 +58,8 @@ static inline uint8_t sheller_try_read_data(sheller_t *desc)
 
 static inline void sheller_write_received_package(sheller_t *desc, uint8_t *dest)
 {
-    for (uint8_t i = 0; i < SHELLER_USEFULL_DATA_LENGTH; ++i) {
-        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+    for (uint8_t i = 0; i < desc->usefull_data_length; ++i) {
+        increase_circular_value(&desc->rx_buff_begin, 1, desc->rx_buff_length);
         dest[i] = desc->rx_buff[desc->rx_buff_begin];
     }
 
@@ -75,9 +75,9 @@ static inline uint16_t sheller_get_circular_buff_length(sheller_t *desc)
         if (desc->rx_buff_end > desc->rx_buff_begin) {
             value = desc->rx_buff_end - desc->rx_buff_begin;
         } else if (desc->rx_buff_end < desc->rx_buff_begin) {
-            value = (SHELLER_RX_BUFF_LENGTH - desc->rx_buff_begin) + desc->rx_buff_end;
+            value = (desc->rx_buff_length - desc->rx_buff_begin) + desc->rx_buff_end;
         } else if (desc->rx_buff_empty_flag == 0) {
-            value = SHELLER_RX_BUFF_LENGTH;
+            value = desc->rx_buff_length;
         }
     }
 
@@ -91,18 +91,22 @@ static inline uint16_t sheller_get_circular_buff_length(sheller_t *desc)
     \param[in] desc - Address of sheller descriptor
     \return result of initializing. This operation can be failed only if a pointer to sheller`s descriptor will be NULL
 */
-uint8_t sheller_init(sheller_t *desc)
+uint8_t sheller_init(sheller_t *desc, uint8_t start_byte, uint8_t usefull_data_length, uint16_t rx_buff_length)
 {
-    uint8_t init_result = SHELLER_ERROR;
+    uint8_t init_result = SHELLER_OK;
     if (desc != NULL) {
+        desc->start_byte = start_byte;
+        desc->usefull_data_length = usefull_data_length;
+        desc->rx_buff_length = rx_buff_length;
         desc->rx_buff_begin = 0;
         desc->rx_buff_end   = 0;
         desc->rx_buff_empty_flag = 1;
         desc->start_byte_pos = 0;
-        for (uint16_t i = 0; i < SHELLER_RX_BUFF_LENGTH; ++i) {
-            desc->rx_buff[i] = 0;
+
+        desc->rx_buff = (uint8_t*)malloc(desc->rx_buff_length);
+        if (desc->rx_buff == NULL) {
+             init_result = SHELLER_ERROR;
         }
-        init_result = SHELLER_OK;
     }
 
     return init_result;
@@ -122,7 +126,7 @@ uint8_t sheller_push(sheller_t *desc, const uint8_t byte)
         if (desc->rx_buff_end != desc->rx_buff_begin || desc->rx_buff_empty_flag == 1) {
             desc->rx_buff_empty_flag = 0;
             desc->rx_buff[desc->rx_buff_end] = byte;
-            desc->rx_buff_end = (desc->rx_buff_end + 1) % SHELLER_RX_BUFF_LENGTH;
+            desc->rx_buff_end = (desc->rx_buff_end + 1) % desc->rx_buff_length;
             work_result = SHELLER_OK;
         }
     }
@@ -143,15 +147,15 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 {
     uint8_t result = SHELLER_ERROR;
     if (desc != NULL && dest != NULL) {
-        if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
+        if (sheller_get_circular_buff_length(desc) >= sheller_get_package_length(desc)) {
             if (sheller_found_start_byte(desc)) {
-                if (sheller_get_circular_buff_length(desc) >= SHELLER_PACKAGE_LENGTH) {
+                if (sheller_get_circular_buff_length(desc) >= sheller_get_package_length(desc)) {
                     if (sheller_try_read_data(desc)) {
                         sheller_write_received_package(desc, dest);
-                        increase_circular_value(&desc->rx_buff_begin, 3, SHELLER_RX_BUFF_LENGTH);
+                        increase_circular_value(&desc->rx_buff_begin, 3, desc->rx_buff_length);
                         result = SHELLER_OK;
                     } else {
-                        increase_circular_value(&desc->rx_buff_begin, 1, SHELLER_RX_BUFF_LENGTH);
+                        increase_circular_value(&desc->rx_buff_begin, 1, desc->rx_buff_length);
                     }
 
                     if (desc->rx_buff_begin == desc->rx_buff_end) {
@@ -178,18 +182,23 @@ uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, 
 {
     uint8_t result = SHELLER_ERROR;
     if ((desc != NULL) && (dest != NULL) && (data != NULL)) {
-        if ((data_length <= SHELLER_USEFULL_DATA_LENGTH) && (data_length > 0)) {
-            memset(dest, 0, SHELLER_PACKAGE_LENGTH);
-            dest[0] = SHELLER_START_BYTE;
+        if ((data_length <= desc->usefull_data_length) && (data_length > 0)) {
+            memset(dest, 0, sheller_get_package_length(desc));
+            dest[0] = desc->start_byte;
             memcpy((dest + 1), data, data_length);
 
-            uint16_t crc = get_crc((dest + 1), SHELLER_USEFULL_DATA_LENGTH);
-            dest[SHELLER_USEFULL_DATA_LENGTH + 1] = crc & 0xFF;
-            dest[SHELLER_USEFULL_DATA_LENGTH + 2] = (crc >> 8) & 0xFF;
+            uint16_t crc = get_crc((dest + 1), desc->usefull_data_length);
+            dest[desc->usefull_data_length + 1] = crc & 0xFF;
+            dest[desc->usefull_data_length + 2] = (crc >> 8) & 0xFF;
 
             result = SHELLER_OK;
         }
     }
 
     return result;
+}
+
+uint8_t sheller_get_package_length(sheller_t *desc)
+{
+    return (desc->usefull_data_length + SHELLER_SERVICE_BYTES_COUNT);
 }
