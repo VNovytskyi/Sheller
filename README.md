@@ -16,6 +16,11 @@ The size of the CRC table is 512 bytes. Interaction with this library going thro
 ![Struct of the package](Schemes/Scheme1.PNG)
 
 ## How to use
+The Sheller object is initialized by the function:
+```c
+uint8_t sheller_init(sheller_t *desc, uint8_t start_byte, uint8_t usefull_data_length, uint16_t rx_buff_length);
+```
+The function is passed a pointer to the sheller object, the value of the start byte, the maximum amount of information in the packet, the size of the receive buffer.<br>
 To create the package, the user needs to pass in function wrap a pointer of the sheller`s object, a pointer to data, which needs to send, the length of data, and a pointer to the buffer for storing the package.
 ```c
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, uint8_t *dest);
