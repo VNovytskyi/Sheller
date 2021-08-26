@@ -2,7 +2,7 @@
     1) Create and initialize Sheller
 */
 sheller_t shell;
-sheller_init(&shell);
+sheller_init(&shell, 0x23, 8, 128);
 
 /*
     2) Declaration the buffer for storing received data
