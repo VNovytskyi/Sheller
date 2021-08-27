@@ -1,6 +1,10 @@
 #ifndef CRC_H
 #define CRC_H
 
+#ifdef STM8S103
+	#include "stm8s.h"
+#endif
+
 #include <stdint.h>
 
 #define TABLE_CRC

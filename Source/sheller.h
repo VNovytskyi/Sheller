@@ -4,9 +4,16 @@
     @version    0.4
 */
 #ifndef SHELLER_H
-#define SHELLER_H
+#define SHELLER_H 1
 
-#include <stdio.h>
+
+#ifdef STM8S103
+	#include "stm8s.h"
+#endif
+
+#include "crc.h"
+
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

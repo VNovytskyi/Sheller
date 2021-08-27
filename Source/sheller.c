@@ -1,5 +1,4 @@
 #include "sheller.h"
-#include "crc.h"
 
 static void increase_circular_value(uint16_t *value, const uint16_t amount, const uint16_t max_value)
 {
