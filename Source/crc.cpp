@@ -38,8 +38,9 @@ const uint16_t crc16_table[256] = {
 
 uint16_t get_crc(const uint8_t *data, const uint16_t length)
 {
+		uint8_t i;
     uint16_t crc = 0xFFFF;
-    for(uint8_t i = 0; i < length; ++i){
+    for(i = 0; i < length; ++i){
         crc = (crc << 8) ^ crc16_table[(crc >> 8) ^ *data++];
     }
 
