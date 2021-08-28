@@ -45,6 +45,10 @@ transmitMessage[2] = 221;
 sheller_wrap(&shell, transmitMessage, 3, transmitBuffer);
 //Send (transmitBuffer, SHELLER_DATA_LENGTH + SHELLER_SERVICE_BYTES_COUNT)
 ```
+#### Deinit sheller
+```c
+sheller_deinit(shell);
+```
 ## Functions description
 The Sheller object is initialized by the function:
 ```c
@@ -68,7 +72,13 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest);
 ```
 In this function pass a pointer of the Sheller`s object and a pointer to the buffer for the received package. Calling the function read starts the process of parsing the package from an internal circular buffer. The function returns true in case successful reading the package otherwise – false.<br>
 The size of circular internal buffer defined by SHELLER_RX_BUFF_LENGTH.<br>
-Buffer overflow can occur due to frequent call the push function and rare call the function read or too high frequency of receiving bytes and too small size of internal buffer SHELLER_RX_BUFF_LENGTH.
+Buffer overflow can occur due to frequent call the push function and rare call the function read or too high frequency of receiving bytes and too small size of internal buffer SHELLER_RX_BUFF_LENGTH.<br>
+To free allocated memory call the function:
+```c
+uint8_t sheller_deinit(sheller_t *desc);
+```
+In this function pass a pointer of the Sheller`s object.
+
 
 ## Internal logic
 ![Struct of the package](Schemes/Scheme2.PNG)
