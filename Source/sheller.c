@@ -67,7 +67,7 @@ static uint8_t sheller_try_read_data(sheller_t *desc)
 
 static void sheller_write_received_package(sheller_t *desc, uint8_t *dest)
 {
-		uint8_t i = 0;
+    uint8_t i = 0;
     for (i = 0; i < desc->usefull_data_length; ++i) {
         increase_circular_value(&desc->rx_buff_begin, 1, desc->rx_buff_length);
         dest[i] = desc->rx_buff[desc->rx_buff_begin];
@@ -117,9 +117,26 @@ uint8_t sheller_init(sheller_t *desc, uint8_t start_byte, uint8_t usefull_data_l
         if (desc->rx_buff == NULL) {
             init_result = SHELLER_ERROR;
         }
+
     }
 
     return init_result;
+}
+
+/*!
+ * \brief sheller_deinit
+ * \param[in] desc - Address of sheller descriptor
+ * \return result of deinitializing
+ */
+uint8_t sheller_deinit(sheller_t *desc)
+{
+    uint8_t deinit_result = SHELLER_ERROR;
+    if (desc != NULL) {
+        free(desc->rx_buff);
+        desc->rx_buff = NULL;
+        deinit_result = SHELLER_OK;
+    }
+    return deinit_result;
 }
 
 /*!
@@ -190,7 +207,7 @@ uint8_t sheller_read(sheller_t *desc, uint8_t *dest)
 */
 uint8_t sheller_wrap(sheller_t *desc, uint8_t *data, const uint8_t data_length, uint8_t *dest)
 {
-		uint16_t crc; 
+    uint16_t crc;
     uint8_t result = SHELLER_ERROR;
     if ((desc != NULL) && (dest != NULL) && (data != NULL)) {
         if ((data_length <= desc->usefull_data_length) && (data_length > 0)) {
