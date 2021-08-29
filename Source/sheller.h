@@ -34,6 +34,9 @@ typedef struct {
     uint16_t rx_buff_begin;
     uint16_t rx_buff_end;
     uint16_t start_byte_pos;
+
+    void (*bufferOverflowCallback)(void);
+    void (*crcErrorCallback)(void);
 } sheller_t;
 
 uint8_t sheller_init(sheller_t *desc, uint8_t start_byte, uint8_t usefull_data_length, uint16_t rx_buff_length);

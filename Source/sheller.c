@@ -60,6 +60,10 @@ static uint8_t sheller_try_read_data(sheller_t *desc)
 
     if (calculate_crc == received_crc) {
         return 1;
+    } else {
+        if (desc->crcErrorCallback != NULL) {
+            desc->crcErrorCallback();
+        }
     }
 
     return 0;
@@ -112,6 +116,8 @@ uint8_t sheller_init(sheller_t *desc, uint8_t start_byte, uint8_t usefull_data_l
         desc->rx_buff_end   = 0;
         desc->rx_buff_empty_flag = 1;
         desc->start_byte_pos = 0;
+        desc->bufferOverflowCallback = NULL;
+        desc->crcErrorCallback = NULL;
 
         desc->rx_buff = (uint8_t*)malloc(desc->rx_buff_length);
         if (desc->rx_buff == NULL) {
@@ -155,6 +161,10 @@ uint8_t sheller_push(sheller_t *desc, const uint8_t byte)
             desc->rx_buff[desc->rx_buff_end] = byte;
             desc->rx_buff_end = (desc->rx_buff_end + 1) % desc->rx_buff_length;
             work_result = SHELLER_OK;
+        } else {
+            if (desc->bufferOverflowCallback != NULL) {
+                desc->bufferOverflowCallback();
+            }
         }
     }
 
