@@ -1,4 +1,5 @@
 # Sheller integrity guarantee
+To run tests with your device, use [ShellerTerminal](https://github.com/VNovytskyi/ShellerTerminal)
 <p align="center">
   <img src="logo.png">
 </p>
