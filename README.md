@@ -86,7 +86,7 @@ In this function pass a pointer of the Sheller`s object.
 Sheller assumes work in communication channels with a high influence of interference. Functioning under such conditions is achieved by a State-machine, which is used for byte-by-byte data reception and a checksum algorithm. <br>
 
 ## Test cases
-You can run the tests for Sheller to make sure it works: [CircularTest_Sheller](https://github.com/VNovytskyi/CircularTest_Sheller)
+You can run the tests for Sheller to make sure it works: [CircularTest_Sheller](https://github.com/VNovytskyi/CircularTest_Sheller), [AutoTest_Sheller](https://github.com/VNovytskyi/AutoTest_Sheller)
 
 The illustration below shows examples of the effect of interference on transmitted packets:
 ![Struct of the package](Schemes/Scheme4.PNG)
