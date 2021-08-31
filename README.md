@@ -21,7 +21,13 @@ The size of the CRC table is 512 bytes. Interaction with this library going thro
 ```c
 #define SHELLER_DATA_LENGTH 8
 sheller_t shell;
+uint8_t sheller_init_result = sheller_init(&shell, 0x23, SHELLER_DATA_LENGTH, 128);
+if (sheller_init_result == SHELLER_ERROR) {
+  //handle error
+}
+    
 uint8_t receiveBuffer[SHELLER_DATA_LENGTH];
+uint8_t transmitBuffer[SHELLER_DATA_LENGTH];
 ```
 #### In main loop call read
 ```c
