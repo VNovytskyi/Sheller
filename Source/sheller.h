@@ -18,6 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SHELLER_STARTBYTE_MIN 1
+#define SHELLER_STARTBYTE_MAX 254
+
 #define SHELLER_OK 1
 #define SHELLER_ERROR 0
 
