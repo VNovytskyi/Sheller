@@ -25,11 +25,11 @@ uint8_t sheller_init_result = sheller_init(&shell, 0x23, SHELLER_DATA_LENGTH, 12
 if (sheller_init_result == SHELLER_ERROR) {
   //handle error
 }
-    
-uint8_t receiveBuffer[SHELLER_DATA_LENGTH];
 ```
 #### In main loop call read
 ```c
+uint8_t receiveBuffer[SHELLER_DATA_LENGTH];
+
 while (1) {
   if (sheller_read(&shell, receiveBuffer) == SHELLER_OK) {
     handleMessage(receiveBuffer, SHELLER_DATA_LENGTH);
