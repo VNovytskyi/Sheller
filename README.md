@@ -27,7 +27,6 @@ if (sheller_init_result == SHELLER_ERROR) {
 }
     
 uint8_t receiveBuffer[SHELLER_DATA_LENGTH];
-uint8_t transmitBuffer[SHELLER_DATA_LENGTH];
 ```
 #### In main loop call read
 ```c
